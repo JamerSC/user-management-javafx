@@ -7,39 +7,41 @@ import java.util.List;
 public class AuthService {
 
     private final UserService userService;
-    private static UserDto currentUser;
 
     public AuthService(UserService userService) {
         this.userService = userService;
     }
 
     /**
-     * Temporary login checker
+     * Verifies user credentials.
+     * Note: In production, passwords should be hashed (e.g., using BCrypt).
      */
-    public boolean login(String usernameOrEmail, String password) {
-        // 1. Temporary Admin Credentials
-        if ("admin".equalsIgnoreCase(usernameOrEmail.trim()) && "admin123".equals(password)) {
-            currentUser = new UserDto("0", "Administrator", "admin@example.com");
+    public boolean authenticate(String usernameOrEmail, String password) {
+        if (usernameOrEmail == null || usernameOrEmail.isBlank() || password == null || password.isBlank()) {
+            return false;
+        }
+
+        String inputUser = usernameOrEmail.trim();
+
+        // 1. Check Hardcoded Admin
+        if ("admin".equalsIgnoreCase(inputUser) && "admin123".equals(password)) {
+            UserSession.startSession(new UserDto("0", "Administrator", "admin@example.com"));
             return true;
         }
 
-        // 2. Check existing Database Users (Default password: "123456")
+        // 2. Check Database Users
         List<UserDto> users = userService.getAllUsers();
         for (UserDto user : users) {
-            if (user.getEmail().equalsIgnoreCase(usernameOrEmail.trim()) && "123456".equals(password)) {
-                currentUser = user;
+            if (user.getEmail().equalsIgnoreCase(inputUser) && "123456".equals(password)) {
+                UserSession.startSession(user);
                 return true;
             }
         }
 
-        return false; // Invalid credentials
+        return false;
     }
 
-    public static UserDto getCurrentUser() {
-        return currentUser;
-    }
-
-    public static void logout() {
-        currentUser = null;
+    public void logout() {
+        UserSession.cleanSession();
     }
 }

@@ -71,5 +71,14 @@ DAO (Data Access Object) Layer: Manages database operations such as querying, in
 Database Connection Layer: Provides a reusable connection to the MySQL database.
 ```
 
+```
+Implement a robust, production-ready login system in JavaFX, you should follow four key architectural principles:
+
+1. Centralized View Navigation (ViewManager): Views should not instantiate other views directly. Use a central manager to handle scene switches and stage resizes.
+2. Asynchronous Execution (Task): Database and authentication calls must run off the JavaFX Application Thread using background threads or Task<T> to prevent the UI from freezing.
+3. Session Management (UserSession): Keep track of the currently logged-in user in a thread-safe session context.
+4. Clean Event Handling: Avoid duplicating event listeners (your current LoginUI sets loginButton.setOnAction twice).
+```
+
 Developer: JamerSC
 Note: Recap, Refresh, & Practice Java Core
