@@ -5,32 +5,14 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.ui.LoginUI;
 import org.example.ui.UserManagementUI;
+import org.example.util.ViewManager;
 
 public class Main extends Application {
 
-//    @Override
-//    public void start(Stage stage) {
-//        UserManagementUI userManagementUI = new UserManagementUI();
-//        Scene scene = new Scene(userManagementUI.getRoot(), 700, 500);
-//        stage.setTitle("User Management");
-//        stage.setScene(scene);
-//        stage.show();
-//    }
-
     @Override
     public void start(Stage primaryStage) {
-        LoginUI loginUI = new LoginUI(primaryStage);
-
-        Scene scene = new Scene(loginUI.getRoot());
-        primaryStage.setTitle("System Login");
-        primaryStage.setScene(scene);
-
-        // --- Set Width and Height here ---
-//        primaryStage.setWidth(1000);  // Width in pixels
-//        primaryStage.setHeight(700);  // Height in pixels
-//        primaryStage.centerOnScreen(); // Center window on display
-
-        primaryStage.show();
+        ViewManager.setStage(primaryStage);
+        ViewManager.showLoginView();
     }
 
     public static void main(String[] args) {

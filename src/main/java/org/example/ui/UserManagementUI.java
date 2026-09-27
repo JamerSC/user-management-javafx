@@ -16,7 +16,9 @@ import org.example.controller.AddUserModalController;
 import org.example.dto.UserDto;
 import org.example.service.AuthService;
 import org.example.service.UserService;
+import org.example.service.UserSession;
 import org.example.util.ExceptionHandler;
+import org.example.util.ViewManager;
 
 import java.util.List;
 
@@ -69,18 +71,18 @@ public class UserManagementUI {
         });
 
         // 4. User Info Header & Logout Button
-        UserDto loggedInUser = AuthService.getCurrentUser();
+        // User Info Header & Logout Button
+        UserDto loggedInUser = UserSession.getCurrentUser();
         String activeUserName = (loggedInUser != null) ? loggedInUser.getName() : "User";
+
         Label userLabel = new Label("Logged in as: " + activeUserName);
         userLabel.setStyle("-fx-font-weight: bold;");
 
         Button logoutButton = new Button("Logout");
         logoutButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
         logoutButton.setOnAction(e -> {
-            AuthService.logout();
-            LoginUI loginUI = new LoginUI(primaryStage);
-            primaryStage.getScene().setRoot(loginUI.getRoot());
-            primaryStage.setTitle("System Login");
+            UserSession.cleanSession();
+            ViewManager.showLoginView();
         });
 
         Button addButton = new Button("Add User");
