@@ -14,7 +14,7 @@ public class UserMapper {
                         String.valueOf(user.getId())
                 );
 
-        return new UserDto(encryptedId, user.getName(), user.getEmail());
+        return new UserDto(encryptedId, user.getName(), user.getEmail(), user.getPassword());
     }
 
     public static User toEntity(UserDto userDto) {

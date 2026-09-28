@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -35,6 +36,9 @@ public class UserController {
 
     @FXML
     private TextField emailField;
+
+    @FXML
+    private PasswordField passwordField;
 
     @FXML
     private TextField searchField;
@@ -110,14 +114,20 @@ public class UserController {
     public void addUser() {
         String name = nameField.getText();
         String email = emailField.getText();
-        userService.createUser(name, email);
+        String password = passwordField.getText();
+        userService.createUser(name, email, password);
         loadUsers();
     }
 
     public void updateUser() {
         UserDto selectedUser = tableView.getSelectionModel().getSelectedItem();
         if (selectedUser != null) {
-            userService.updateUser(selectedUser.getId(), nameField.getText(), emailField.getText());
+            userService.updateUser(
+                    selectedUser.getId(),
+                    nameField.getText(),
+                    emailField.getText(),
+                    passwordField.getText()
+            );
             loadUsers();
         }
     }

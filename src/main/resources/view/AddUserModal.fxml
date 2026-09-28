@@ -11,5 +11,6 @@
     <TextField fx:id="idField" visible="false" />
     <TextField fx:id="nameField" promptText="Name" />
     <TextField fx:id="emailField" promptText="Email" />
+    <PasswordField fx:id="passwordField" promptText="Password" />
     <Button text="Save User" onAction="#handleSaveUser" />
 </VBox>

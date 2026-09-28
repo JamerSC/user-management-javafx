@@ -5,6 +5,7 @@ import org.example.dto.UserDto;
 import org.example.mapper.UserMapper;
 import org.example.model.User;
 import org.example.security.CryptoUtil;
+import org.example.util.PasswordUtil;
 
 import java.util.List;
 
@@ -17,21 +18,20 @@ public class UserService {
     }
 
     // CREATE USER
-    public void createUser(String name, String email) {
-
+    public void createUser(String name, String email, String rawPassword) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Name cannot be null or blank"
-            );
+            throw new IllegalArgumentException("Name cannot be null or blank");
         }
-
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Name cannot be null or blank"
-            );
+            throw new IllegalArgumentException("Email cannot be null or blank");
+        }
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new IllegalArgumentException("Password cannot be null or blank");
         }
 
-        User user = new User(name, email);
+        // Hash password before saving
+        String hashedPassword = PasswordUtil.hashPassword(rawPassword);
+        User user = new User(name, email, hashedPassword);
 
         userDAO.save(user);
     }
@@ -58,26 +58,22 @@ public class UserService {
     }
 
     // UPDATE USER
-    public void updateUser(String encryptedId, String name, String email) {
-
-        int id = Integer.parseInt(
-                CryptoUtil.decrypt(encryptedId)
-        );
+    public void updateUser(String encryptedId, String name, String email, String rawPassword) {
+        int id = Integer.parseInt(CryptoUtil.decrypt(encryptedId));
 
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Name cannot be null or blank"
-            );
+            throw new IllegalArgumentException("Name cannot be null or blank");
         }
-
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Name cannot be null or blank"
-            );
+            throw new IllegalArgumentException("Email cannot be null or blank");
         }
 
-        User user = new User(id, name, email);
+        // Only hash password if a new password was typed in
+        String hashedPassword = (rawPassword != null && !rawPassword.isBlank())
+                ? PasswordUtil.hashPassword(rawPassword)
+                : null;
 
+        User user = new User(id, name, email, hashedPassword);
         userDAO.update(user);
     }
 

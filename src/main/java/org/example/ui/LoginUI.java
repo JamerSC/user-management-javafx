@@ -12,24 +12,23 @@ import org.example.service.UserService;
 import org.example.util.ViewManager;
 
 public class LoginUI {
-
     private final VBox root;
     private final AuthService authService;
 
     public LoginUI() {
-        this.authService = new AuthService(new UserService(new UserDAO()));
+        this.authService = new AuthService(new UserDAO());
 
         Label titleLabel = new Label("System Login");
-        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        TextField usernameField = new TextField();
-        usernameField.setPromptText("Username / Email");
+        TextField emailField = new TextField();
+        emailField.setPromptText("Email Address");
 
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Password");
 
         Label errorLabel = new Label();
-        errorLabel.setStyle("-fx-text-fill: red;");
+        errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
 
         ProgressIndicator loadingSpinner = new ProgressIndicator();
         loadingSpinner.setMaxSize(24, 24);
@@ -38,57 +37,56 @@ public class LoginUI {
         Button loginButton = new Button("Login");
         loginButton.setDefaultButton(true);
 
-        // Async Login Handler
         loginButton.setOnAction(e -> {
-            String username = usernameField.getText();
+            String email = emailField.getText();
             String password = passwordField.getText();
 
-            // Disable controls during login task
-            loginButton.setDisable(true);
-            usernameField.setDisable(true);
-            passwordField.setDisable(true);
-            loadingSpinner.setVisible(true);
+            if (email.isBlank() || password.isBlank()) {
+                errorLabel.setText("Please enter both email and password.");
+                return;
+            }
+
+            // Lock UI controls during async request
+            setFormDisabled(true, loginButton, emailField, passwordField, loadingSpinner);
             errorLabel.setText("");
 
-            // Execute authentication in a background thread
-            // UI Thread Safety: Integrated javafx.concurrent.
-            // Task to perform authentication asynchronously so the app stays responsive.
-
-            Task<Boolean> loginTask = new Task<>() {
+            // Background Authentication Task
+            Task<Boolean> authTask = new Task<>() {
                 @Override
                 protected Boolean call() {
-                    return authService.authenticate(username, password);
+                    return authService.authenticate(email, password);
                 }
             };
 
-            loginTask.setOnSucceeded(event -> {
-                boolean authenticated = loginTask.getValue();
-                loadingSpinner.setVisible(false);
+            authTask.setOnSucceeded(event -> {
+                boolean isAuthenticated = authTask.getValue();
+                setFormDisabled(false, loginButton, emailField, passwordField, loadingSpinner);
 
-                if (authenticated) {
+                if (isAuthenticated) {
                     ViewManager.showUserManagementView();
                 } else {
-                    loginButton.setDisable(false);
-                    usernameField.setDisable(false);
-                    passwordField.setDisable(false);
-                    errorLabel.setText("Invalid username or password.");
+                    errorLabel.setText("Invalid email or password.");
                 }
             });
 
-            loginTask.setOnFailed(event -> {
-                loadingSpinner.setVisible(false);
-                loginButton.setDisable(false);
-                usernameField.setDisable(false);
-                passwordField.setDisable(false);
-                errorLabel.setText("An unexpected error occurred. Please try again.");
+            authTask.setOnFailed(event -> {
+                setFormDisabled(false, loginButton, emailField, passwordField, loadingSpinner);
+                errorLabel.setText("Connection error. Please try again.");
             });
 
-            new Thread(loginTask).start();
+            new Thread(authTask).start();
         });
 
-        root = new VBox(12, titleLabel, usernameField, passwordField, loginButton, loadingSpinner, errorLabel);
+        root = new VBox(12, titleLabel, emailField, passwordField, loginButton, loadingSpinner, errorLabel);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(30));
+    }
+
+    private void setFormDisabled(boolean disabled, Button btn, TextField email, PasswordField pwd, ProgressIndicator spinner) {
+        btn.setDisable(disabled);
+        email.setDisable(disabled);
+        pwd.setDisable(disabled);
+        spinner.setVisible(disabled);
     }
 
     public VBox getRoot() {
