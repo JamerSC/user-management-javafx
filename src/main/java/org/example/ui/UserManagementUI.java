@@ -14,7 +14,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.controller.AddUserModalController;
 import org.example.dto.UserDto;
-import org.example.service.AuthService;
 import org.example.service.UserService;
 import org.example.service.UserSession;
 import org.example.util.ExceptionHandler;

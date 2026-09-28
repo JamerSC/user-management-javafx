@@ -2,6 +2,7 @@ package org.example.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.dto.UserDto;
@@ -15,6 +16,9 @@ public class AddUserModalController {
 
     @FXML
     private TextField emailField;
+
+    @FXML
+    private PasswordField passwordField;
 
     @FXML
     private TextField idField;
@@ -42,6 +46,7 @@ public class AddUserModalController {
         String idText = idField.getText();
         String name = nameField.getText();
         String email = emailField.getText();
+        String password = passwordField.getText();
 
         if (!validateInput(name, email)) {
             return; // Stop execution if validation fails
@@ -50,10 +55,10 @@ public class AddUserModalController {
         try {
             if (idText == null || idText.isBlank()) {
                 // Add new user
-                userService.createUser(name, email);
+                userService.createUser(name, email, password);
             } else {
                 // Edit existing user
-                userService.updateUser(idText, name, email);
+                userService.updateUser(idText, name, email, password);
             }
             closeModal();
         } catch (Exception e) {
@@ -66,6 +71,7 @@ public class AddUserModalController {
             idField.setText(String.valueOf(user.getId()));
             nameField.setText(user.getName());
             emailField.setText(user.getEmail());
+            passwordField.setText(user.getPassword());
         }
     }
 
