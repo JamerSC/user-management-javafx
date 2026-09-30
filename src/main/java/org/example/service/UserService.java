@@ -33,7 +33,25 @@ public class UserService {
         String hashedPassword = PasswordUtil.hashPassword(rawPassword);
         User user = new User(name, email, hashedPassword);
 
+        // Populate createdBy from current session
+        Integer currentUserId = getCurrentLoggedInUserId();
+        user.setCreatedBy(currentUserId);
+        user.setUpdatedBy(currentUserId);
+
         userDAO.save(user);
+    }
+
+    private Integer getCurrentLoggedInUserId() {
+        UserDto currentUser = UserSession.getCurrentUser();
+        if (currentUser != null && currentUser.getId() != null) {
+            try {
+                return Integer.parseInt(CryptoUtil.decrypt(currentUser.getId()));
+            } catch (Exception e) {
+                // If ID was not encrypted in session, parse directly
+                return Integer.parseInt(currentUser.getId());
+            }
+        }
+        return null; // Null if created by system / initial seed
     }
 
     // GET ALL USERS
@@ -74,6 +92,10 @@ public class UserService {
                 : null;
 
         User user = new User(id, name, email, hashedPassword);
+
+        // Populate updatedBy from current session
+        user.setUpdatedBy(getCurrentLoggedInUserId());
+
         userDAO.update(user);
     }
 

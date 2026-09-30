@@ -43,25 +43,16 @@
         </HBox>
 
         <!-- Table View -->
-        <TableView
-                fx:id="tableView"
-                VBox.vgrow="ALWAYS">
-
+        <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn
-                        text="ID"
-                        fx:id="idColumn"
-                        prefWidth="100.0" />
+                <TableColumn text="Name" fx:id="nameColumn" prefWidth="150.0" />
+                <TableColumn text="Email" fx:id="emailColumn" prefWidth="200.0" />
 
-                <TableColumn
-                        text="Name"
-                        fx:id="nameColumn"
-                        prefWidth="200.0" />
-
-                <TableColumn
-                        text="Email"
-                        fx:id="emailColumn"
-                        prefWidth="250.0" />
+                <!-- Audit Columns -->
+                <TableColumn text="Created By" fx:id="createdByColumn" prefWidth="120.0" />
+                <TableColumn text="Created Date" fx:id="createdDateColumn" prefWidth="150.0" />
+                <TableColumn text="Updated By" fx:id="updatedByColumn" prefWidth="120.0" />
+                <TableColumn text="Updated Date" fx:id="updatedDateColumn" prefWidth="150.0" />
             </columns>
         </TableView>
 

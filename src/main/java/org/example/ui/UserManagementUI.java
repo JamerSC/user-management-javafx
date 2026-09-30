@@ -44,7 +44,28 @@ public class UserManagementUI {
         TableColumn<UserDto, String> emailColumn = new TableColumn<>("Email");
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
 
-        tableView.getColumns().addAll(idColumn, nameColumn, emailColumn);
+        // --- Add Audit Columns ---
+        TableColumn<UserDto, String> createdByColumn = new TableColumn<>("Created By");
+        createdByColumn.setCellValueFactory(new PropertyValueFactory<>("createdByName"));
+
+        TableColumn<UserDto, String> createdDateColumn = new TableColumn<>("Created Date");
+        createdDateColumn.setCellValueFactory(new PropertyValueFactory<>("createdDate"));
+
+        TableColumn<UserDto, String> updatedByColumn = new TableColumn<>("Updated By");
+        updatedByColumn.setCellValueFactory(new PropertyValueFactory<>("updatedByName"));
+
+        TableColumn<UserDto, String> updatedDateColumn = new TableColumn<>("Updated Date");
+        updatedDateColumn.setCellValueFactory(new PropertyValueFactory<>("updatedDate"));
+
+        tableView.getColumns().addAll(
+                idColumn,
+                nameColumn,
+                emailColumn,
+                createdByColumn,
+                createdDateColumn,
+                updatedByColumn,
+                updatedDateColumn
+        );
 
         initializeActionColumn();
 

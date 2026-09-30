@@ -1,11 +1,22 @@
 package org.example.model;
 
+import java.time.LocalDateTime;
+
 public class User {
 
     private int id;
     private String name;
     private String email;
     private String password;
+
+    // Audit Fields
+    private Integer createdBy;       // Foreign key ID (Nullable)
+    private String createdByName;   // Display name for UI joins
+    private LocalDateTime createdDate;
+
+    private Integer updatedBy;       // Foreign key ID (Nullable)
+    private String updatedByName;   // Display name for UI joins
+    private LocalDateTime updatedDate;
 
     // 1. No-argument constructor
     public User() {
@@ -70,6 +81,24 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public Integer getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Integer createdBy) { this.createdBy = createdBy; }
+
+    public String getCreatedByName() { return createdByName; }
+    public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
+
+    public LocalDateTime getCreatedDate() { return createdDate; }
+    public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
+
+    public Integer getUpdatedBy() { return updatedBy; }
+    public void setUpdatedBy(Integer updatedBy) { this.updatedBy = updatedBy; }
+
+    public String getUpdatedByName() { return updatedByName; }
+    public void setUpdatedByName(String updatedByName) { this.updatedByName = updatedByName; }
+
+    public LocalDateTime getUpdatedDate() { return updatedDate; }
+    public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
 
     @Override
     public String toString() {
