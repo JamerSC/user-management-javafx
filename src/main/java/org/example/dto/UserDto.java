@@ -11,6 +11,12 @@ public class UserDto {
     private final StringProperty email = new SimpleStringProperty();
     private final StringProperty password = new SimpleStringProperty();
 
+    // Audit Properties
+    private final StringProperty createdByName = new SimpleStringProperty();
+    private final StringProperty createdDate = new SimpleStringProperty();
+    private final StringProperty updatedByName = new SimpleStringProperty();
+    private final StringProperty updatedDate = new SimpleStringProperty();
+
     public UserDto() {
     }
 
@@ -68,6 +74,23 @@ public class UserDto {
     public void setPassword(String password) {
         this.password.set(password);
     }
+
+    // Audit Getters & Setters
+    public String getCreatedByName() { return createdByName.get(); }
+    public StringProperty createdByNameProperty() { return createdByName; }
+    public void setCreatedByName(String createdByName) { this.createdByName.set(createdByName); }
+
+    public String getCreatedDate() { return createdDate.get(); }
+    public StringProperty createdDateProperty() { return createdDate; }
+    public void setCreatedDate(String createdDate) { this.createdDate.set(createdDate); }
+
+    public String getUpdatedByName() { return updatedByName.get(); }
+    public StringProperty updatedByNameProperty() { return updatedByName; }
+    public void setUpdatedByName(String updatedByName) { this.updatedByName.set(updatedByName); }
+
+    public String getUpdatedDate() { return updatedDate.get(); }
+    public StringProperty updatedDateProperty() { return updatedDate; }
+    public void setUpdatedDate(String updatedDate) { this.updatedDate.set(updatedDate); }
 
     @Override
     public String toString() {

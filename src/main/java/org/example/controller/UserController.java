@@ -41,6 +41,18 @@ public class UserController {
     private PasswordField passwordField;
 
     @FXML
+    private TableColumn<UserDto, String> createdByColumn;
+
+    @FXML
+    private TableColumn<UserDto, String> createdDateColumn;
+
+    @FXML
+    private TableColumn<UserDto, String> updatedByColumn;
+
+    @FXML
+    private TableColumn<UserDto, String> updatedDateColumn;
+
+    @FXML
     private TextField searchField;
 
     private final ObservableList<UserDto> userData =
@@ -55,6 +67,12 @@ public class UserController {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+        // Optional: Bind Audit columns
+        if (createdByColumn != null) createdByColumn.setCellValueFactory(new PropertyValueFactory<>("createdByName"));
+        if (createdDateColumn != null) createdDateColumn.setCellValueFactory(new PropertyValueFactory<>("createdDate"));
+        if (updatedByColumn != null) updatedByColumn.setCellValueFactory(new PropertyValueFactory<>("updatedByName"));
+        if (updatedDateColumn != null) updatedDateColumn.setCellValueFactory(new PropertyValueFactory<>("updatedDate"));
 
         loadUsers();
 
