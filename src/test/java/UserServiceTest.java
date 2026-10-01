@@ -1,6 +1,10 @@
 import org.example.dao.UserDAO;
+import org.example.dto.UserDto;
 import org.example.model.User;
+import org.example.security.CryptoUtil;
 import org.example.service.UserService;
+import org.example.service.UserSession;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +23,12 @@ public class UserServiceTest {
     void setUp() {
         userDAO = mock(UserDAO.class);
         userService = new UserService(userDAO);
+        UserSession.cleanSession(); // Ensure a clean session before each test
+    }
+
+    @AfterEach
+    void tearDown() {
+        UserSession.cleanSession();
     }
 
 //    1. Use a Testing Framework
@@ -43,14 +53,14 @@ public class UserServiceTest {
     void createUser_ShouldSaveUser_WhenValidInput() {
         // Arrange
         String name = "Wolfgang Amadeus Mozart";
-        String email = "wolgang@mail.com";
+        String email = "wolfgang@mail.com";
+        String password = "Password123!";
 
         // Act
-        userService.createUser(name, email);
+        userService.createUser(name, email, password);
 
         // Assert
-        verify(userDAO, times(1))
-                .save(any(User.class)); // Verify save() was called once
+        verify(userDAO, times(1)).save(any(User.class));
     }
 
     @Test
@@ -58,23 +68,53 @@ public class UserServiceTest {
         // Arrange
         String name = " ";
         String email = "example@example.com";
+        String password = "Password123!";
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userService.createUser(name, email);
-        });
-
-//        try {
-//            userService.createUser(name, email);
-//        } catch (IllegalArgumentException e) {
-//            assert(e.getMessage().equals("Name cannot be null or blank"));
-//        }
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.createUser(name, email, password)
+        );
 
         assertEquals("Name cannot be null or blank", exception.getMessage());
+        verify(userDAO, never()).save(any());
     }
 
     @Test
-    void getAllUsers_ShouldReturnListOfUsers() {
+    void createUser_ShouldThrowException_WhenEmailIsBlank() {
+        // Arrange
+        String name = "John Doe";
+        String email = "";
+        String password = "Password123!";
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.createUser(name, email, password)
+        );
+
+        assertEquals("Email cannot be null or blank", exception.getMessage());
+        verify(userDAO, never()).save(any());
+    }
+
+    @Test
+    void createUser_ShouldThrowException_WhenPasswordIsBlank() {
+        // Arrange
+        String name = "John Doe";
+        String email = "john@example.com";
+        String password = "   ";
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.createUser(name, email, password)
+        );
+
+        assertEquals("Password cannot be null or blank", exception.getMessage());
+        verify(userDAO, never()).save(any());
+    }
+
+    // --- GET USERS TESTS ---
+
+    @Test
+    void getAllUsers_ShouldReturnListOfUserDtos() {
         // Arrange
         List<User> mockUsers = Arrays.asList(
                 new User(1, "John Doe", "john.doe@example.com"),
@@ -83,7 +123,7 @@ public class UserServiceTest {
         when(userDAO.findAll()).thenReturn(mockUsers);
 
         // Act
-        List<User> users = userService.getAllUsers();
+        List<UserDto> users = userService.getAllUsers();
 
         // Assert
         assertEquals(2, users.size());
@@ -94,42 +134,65 @@ public class UserServiceTest {
     @Test
     void getUserById_ShouldReturnUser_WhenUserExists() {
         // Arrange
-        int userId = 1;
-        User mockUser = new User(userId, "John Doe", "john.doe@example.com");
-        when(userDAO.findById(userId)).thenReturn(mockUser);
+        int rawId = 1;
+        String encryptedId = CryptoUtil.encrypt(String.valueOf(rawId));
+        User mockUser = new User(rawId, "John Doe", "john.doe@example.com");
+
+        when(userDAO.findById(rawId)).thenReturn(mockUser);
 
         // Act
-        User user = userService.getUserById(userId);
+        User user = userService.getUserById(encryptedId);
 
         // Assert
         assertNotNull(user);
         assertEquals("John Doe", user.getName());
-        verify(userDAO, times(1)).findById(userId);
+        verify(userDAO, times(1)).findById(rawId);
     }
 
     @Test
     void getUserById_ShouldReturnNull_WhenUserDoesNotExist() {
         // Arrange
-        int userId = 1;
-        when(userDAO.findById(userId)).thenReturn(null);
+        int rawId = 99;
+        String encryptedId = CryptoUtil.encrypt(String.valueOf(rawId));
+
+        when(userDAO.findById(rawId)).thenReturn(null);
 
         // Act
-        User user = userService.getUserById(userId);
+        User user = userService.getUserById(encryptedId);
 
         // Assert
         assertNull(user);
-        verify(userDAO, times(1)).findById(userId);
+        verify(userDAO, times(1)).findById(rawId);
+    }
+
+    // --- UPDATE USER TESTS ---
+
+    @Test
+    void updateUser_ShouldUpdateUser_WhenValidInputWithNewPassword() {
+        // Arrange
+        int rawId = 1;
+        String encryptedId = CryptoUtil.encrypt(String.valueOf(rawId));
+        String name = "Updated Name";
+        String email = "updated.email@example.com";
+        String newPassword = "NewPassword123!";
+
+        // Act
+        userService.updateUser(encryptedId, name, email, newPassword);
+
+        // Assert
+        verify(userDAO, times(1)).update(any(User.class));
     }
 
     @Test
-    void updateUser_ShouldUpdateUser_WhenValidInput() {
+    void updateUser_ShouldUpdateUser_WhenPasswordIsBlankOrNull() {
         // Arrange
-        int userId = 1;
+        int rawId = 1;
+        String encryptedId = CryptoUtil.encrypt(String.valueOf(rawId));
         String name = "Updated Name";
         String email = "updated.email@example.com";
 
-        // Act
-        userService.updateUser(userId, name, email);
+        // Act (Pass null or empty string for password to keep existing password)
+        userService.updateUser(encryptedId, name, email, "");
 
         // Assert
         verify(userDAO, times(1)).update(any(User.class));
@@ -138,27 +201,31 @@ public class UserServiceTest {
     @Test
     void updateUser_ShouldThrowException_WhenNameIsBlank() {
         // Arrange
-        int userId = 1;
-        String name = " ";
-        String email = "updated.email@example.com";
+        int rawId = 1;
+        String encryptedId = CryptoUtil.encrypt(String.valueOf(rawId));
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userService.updateUser(userId, name, email);
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.updateUser(encryptedId, " ", "updated@mail.com", "pass")
+        );
 
         assertEquals("Name cannot be null or blank", exception.getMessage());
+        verify(userDAO, never()).update(any());
     }
+
+
+    // --- DELETE USER TESTS ---
 
     @Test
     void deleteUserById_ShouldDeleteUser_WhenUserExists() {
         // Arrange
-        int userId = 1;
+        int rawId = 1;
+        String encryptedId = CryptoUtil.encrypt(String.valueOf(rawId));
 
         // Act
-        userService.deleteUserById(userId);
+        userService.deleteUserById(encryptedId);
 
         // Assert
-        verify(userDAO, times(1)).delete(userId);
+        verify(userDAO, times(1)).delete(rawId);
     }
 }
