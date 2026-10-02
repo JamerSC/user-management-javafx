@@ -1,5 +1,6 @@
 ### Java Desktop Application
-### User Management System
+### Use
+r Management System
 #### 8/17/2026
 
 Architecture Overview
@@ -31,24 +32,14 @@ Architecture Overview
 ```
 #### User Management Desktop App
 
-```
-┌────────────────────────────────────────────┐
-│              User Management               │
-├────────────────────────────────────────────┤
-│                                            │
-│  Name:  [ Mary Public                 ]    │
-│                                            │
-│  Email: [ mary@example.com             ]   │
-│                                            │
-│          [ Save ] [ Update ] [ Delete ]    │
-│                                            │
-├────────────────────────────────────────────┤
-│ ID │ Name          │ Email                 │
-├────┼───────────────┼───────────────────────┤
-│ 1  │ Mary          │ mary@example.com      │
-│ 2  │ John          │ john@example.com      │
-└────────────────────────────────────────────┘
-```
+
+![image_1.png](images%2Fimage_1.png)
+
+![image_2.png](images%2Fimage_2.png)
+
+![image_3.png](images%2Fimage_3.png)
+
+![image_4.png](images%2Fimage_4.png)
 
 ### Java Core & Spring Boot (Java Framework) Comparison
 ```
