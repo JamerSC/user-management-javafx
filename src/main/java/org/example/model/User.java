@@ -1,6 +1,8 @@
 package org.example.model;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 public class User {
 
@@ -17,6 +19,10 @@ public class User {
     private Integer updatedBy;       // Foreign key ID (Nullable)
     private String updatedByName;   // Display name for UI joins
     private LocalDateTime updatedDate;
+
+    // RBAC Fields
+    private Set<Role> roles = new HashSet<>();
+    private Set<String> permissions = new HashSet<>();
 
     // 1. No-argument constructor
     public User() {
@@ -99,6 +105,16 @@ public class User {
 
     public LocalDateTime getUpdatedDate() { return updatedDate; }
     public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
+
+    public Set<Role> getRoles() { return roles; }
+    public void setRoles(Set<Role> roles) { this.roles = roles; }
+
+    public Set<String> getPermissions() { return permissions; }
+    public void setPermissions(Set<String> permissions) { this.permissions = permissions; }
+
+    public boolean hasPermission(String permissionName) {
+        return permissions.contains(permissionName);
+    }
 
     @Override
     public String toString() {

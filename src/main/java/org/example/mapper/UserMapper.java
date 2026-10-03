@@ -1,6 +1,7 @@
 package org.example.mapper;
 
 import org.example.dto.UserDto;
+import org.example.model.Role;
 import org.example.model.User;
 import org.example.security.CryptoUtil;
 
@@ -30,6 +31,16 @@ public class UserMapper {
         }
         if (user.getUpdatedDate() != null) {
             dto.setUpdatedDate(user.getUpdatedDate().format(FORMATTER));
+        }
+
+        // Map Permissions & Roles
+        if (user.getPermissions() != null) {
+            dto.setPermissions(user.getPermissions());
+        }
+        if (user.getRoles() != null) {
+            for (Role role : user.getRoles()) {
+                dto.getRoles().add(role.getName());
+            }
         }
 
         return dto;

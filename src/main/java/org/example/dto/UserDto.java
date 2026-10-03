@@ -3,6 +3,9 @@ package org.example.dto;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class UserDto {
 
 //    private final IntegerProperty id = new SimpleIntegerProperty();
@@ -16,6 +19,10 @@ public class UserDto {
     private final StringProperty createdDate = new SimpleStringProperty();
     private final StringProperty updatedByName = new SimpleStringProperty();
     private final StringProperty updatedDate = new SimpleStringProperty();
+
+    // RBAC Security Collections
+    private Set<String> roles = new HashSet<>();
+    private Set<String> permissions = new HashSet<>();
 
     public UserDto() {
     }
@@ -91,6 +98,12 @@ public class UserDto {
     public String getUpdatedDate() { return updatedDate.get(); }
     public StringProperty updatedDateProperty() { return updatedDate; }
     public void setUpdatedDate(String updatedDate) { this.updatedDate.set(updatedDate); }
+
+    public Set<String> getRoles() { return roles; }
+    public void setRoles(Set<String> roles) { this.roles = roles; }
+
+    public Set<String> getPermissions() { return permissions; }
+    public void setPermissions(Set<String> permissions) { this.permissions = permissions; }
 
     @Override
     public String toString() {
