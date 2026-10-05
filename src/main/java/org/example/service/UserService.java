@@ -19,26 +19,78 @@ public class UserService {
 
     // CREATE USER
     public void createUser(String name, String email, String rawPassword) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be null or blank");
-        }
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Email cannot be null or blank");
-        }
-        if (rawPassword == null || rawPassword.isBlank()) {
-            throw new IllegalArgumentException("Password cannot be null or blank");
+        // Enforce RBAC Permission Check
+        if (!UserSession.hasPermission("USER_CREATE")) {
+            throw new SecurityException("Access Denied: Missing 'USER_CREATE' permission.");
         }
 
-        // Hash password before saving
+        if (name == null || name.isBlank()) throw new IllegalArgumentException("Name cannot be null or blank");
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("Email cannot be null or blank");
+        if (rawPassword == null || rawPassword.isBlank()) throw new IllegalArgumentException("Password cannot be null or blank");
+
         String hashedPassword = PasswordUtil.hashPassword(rawPassword);
         User user = new User(name, email, hashedPassword);
 
-        // Populate createdBy from current session
         Integer currentUserId = getCurrentLoggedInUserId();
         user.setCreatedBy(currentUserId);
         user.setUpdatedBy(currentUserId);
 
         userDAO.save(user);
+    }
+
+    // GET ALL USERS
+    public List<UserDto> getAllUsers() {
+        // Enforce RBAC Permission Check
+        if (!UserSession.hasPermission("USER_READ")) {
+            throw new SecurityException("Access Denied: Missing 'USER_READ' permission.");
+        }
+
+        return userDAO.findAll().stream()
+                .map(UserMapper::toDto)
+                .toList();
+    }
+
+    // GET USER BY ID
+    public User getUserById(String encryptedId) {
+        if (!UserSession.hasPermission("USER_READ")) {
+            throw new SecurityException("Access Denied: Missing 'USER_READ' permission.");
+        }
+
+        int id = Integer.parseInt(CryptoUtil.decrypt(encryptedId));
+        return userDAO.findById(id);
+    }
+
+    // UPDATE USER
+    public void updateUser(String encryptedId, String name, String email, String rawPassword) {
+        // Enforce RBAC Permission Check
+        if (!UserSession.hasPermission("USER_UPDATE")) {
+            throw new SecurityException("Access Denied: Missing 'USER_UPDATE' permission.");
+        }
+
+        int id = Integer.parseInt(CryptoUtil.decrypt(encryptedId));
+
+        if (name == null || name.isBlank()) throw new IllegalArgumentException("Name cannot be null or blank");
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("Email cannot be null or blank");
+
+        String hashedPassword = (rawPassword != null && !rawPassword.isBlank())
+                ? PasswordUtil.hashPassword(rawPassword)
+                : null;
+
+        User user = new User(id, name, email, hashedPassword);
+        user.setUpdatedBy(getCurrentLoggedInUserId());
+
+        userDAO.update(user);
+    }
+
+    // DELETE USER BY ID
+    public void deleteUserById(String encryptedId) {
+        // Enforce RBAC Permission Check
+        if (!UserSession.hasPermission("USER_DELETE")) {
+            throw new SecurityException("Access Denied: Missing 'USER_DELETE' permission.");
+        }
+
+        int id = Integer.parseInt(CryptoUtil.decrypt(encryptedId));
+        userDAO.delete(id);
     }
 
     private Integer getCurrentLoggedInUserId() {
@@ -47,65 +99,9 @@ public class UserService {
             try {
                 return Integer.parseInt(CryptoUtil.decrypt(currentUser.getId()));
             } catch (Exception e) {
-                // If ID was not encrypted in session, parse directly
                 return Integer.parseInt(currentUser.getId());
             }
         }
-        return null; // Null if created by system / initial seed
-    }
-
-    // GET ALL USERS
-    public List<UserDto> getAllUsers() {
-//        return userDAO.findAll();
-
-        List<User> users = userDAO.findAll();
-
-        return users.stream()
-                .map(UserMapper::toDto)
-                .toList();
-    }
-
-    // GET USER BY ID
-    public User getUserById(String encryptedId) {
-
-        int id = Integer.parseInt(
-                CryptoUtil.decrypt(encryptedId)
-        );
-
-        return userDAO.findById(id);
-    }
-
-    // UPDATE USER
-    public void updateUser(String encryptedId, String name, String email, String rawPassword) {
-        int id = Integer.parseInt(CryptoUtil.decrypt(encryptedId));
-
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be null or blank");
-        }
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Email cannot be null or blank");
-        }
-
-        // Only hash password if a new password was typed in
-        String hashedPassword = (rawPassword != null && !rawPassword.isBlank())
-                ? PasswordUtil.hashPassword(rawPassword)
-                : null;
-
-        User user = new User(id, name, email, hashedPassword);
-
-        // Populate updatedBy from current session
-        user.setUpdatedBy(getCurrentLoggedInUserId());
-
-        userDAO.update(user);
-    }
-
-    // DELETE USER BY ID
-    public void deleteUserById(String encryptedId) {
-
-        int id = Integer.parseInt(
-                CryptoUtil.decrypt(encryptedId)
-        );
-
-        userDAO.delete(id);
+        return null;
     }
 }
