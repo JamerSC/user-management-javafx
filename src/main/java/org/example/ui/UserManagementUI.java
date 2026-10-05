@@ -33,7 +33,6 @@ public class UserManagementUI {
     private final VBox root;
 
     public UserManagementUI(Stage primaryStage) {
-        // 1. Configure Table Columns
         TableColumn<UserDto, String> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         idColumn.setVisible(false);
@@ -44,7 +43,6 @@ public class UserManagementUI {
         TableColumn<UserDto, String> emailColumn = new TableColumn<>("Email");
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
 
-        // --- Add Audit Columns ---
         TableColumn<UserDto, String> createdByColumn = new TableColumn<>("Created By");
         createdByColumn.setCellValueFactory(new PropertyValueFactory<>("createdByName"));
 
@@ -67,14 +65,13 @@ public class UserManagementUI {
                 updatedDateColumn
         );
 
+        // Action column rendering checks update/delete permissions
         initializeActionColumn();
 
-        // 2. Data binding & Filtered list setup
         SortedList<UserDto> sortedData = new SortedList<>(filteredData);
         sortedData.comparatorProperty().bind(tableView.comparatorProperty());
         tableView.setItems(sortedData);
 
-        // 3. Search Filter Logic
         searchField.setPromptText("Search by name or email...");
         HBox.setHgrow(searchField, Priority.ALWAYS);
 
@@ -90,8 +87,6 @@ public class UserManagementUI {
             });
         });
 
-        // 4. User Info Header & Logout Button
-        // User Info Header & Logout Button
         UserDto loggedInUser = UserSession.getCurrentUser();
         String activeUserName = (loggedInUser != null) ? loggedInUser.getName() : "User";
 
@@ -108,6 +103,10 @@ public class UserManagementUI {
         Button addButton = new Button("Add User");
         addButton.setOnAction(event -> openAddUserModal());
 
+        // Dynamic UI Permission Check: Hide or Disable 'Add User' button
+        addButton.setVisible(UserSession.hasPermission("USER_CREATE"));
+        addButton.setManaged(UserSession.hasPermission("USER_CREATE"));
+
         HBox topBar = new HBox(10, userLabel, searchField, addButton, logoutButton);
         topBar.setStyle("-fx-alignment: center-left;");
 
@@ -122,8 +121,12 @@ public class UserManagementUI {
     }
 
     private void loadUsers() {
-        List<UserDto> users = userService.getAllUsers();
-        userData.setAll(users);
+        try {
+            List<UserDto> users = userService.getAllUsers();
+            userData.setAll(users);
+        } catch (SecurityException e) {
+            showMessage("Access Denied", e.getMessage());
+        }
     }
 
     private void openAddUserModal() {
@@ -141,28 +144,42 @@ public class UserManagementUI {
 
             loadUsers();
         } catch (Exception e) {
-            ExceptionHandler.handleException(e, "Failed to load the user modal. Please try again.");
+            ExceptionHandler.handleException(e, "Failed to load user modal.");
         }
     }
 
     private void initializeActionColumn() {
+        boolean canUpdate = UserSession.hasPermission("USER_UPDATE");
+        boolean canDelete = UserSession.hasPermission("USER_DELETE");
+
+        // Skip adding the action column if the user has neither permission
+        if (!canUpdate && !canDelete) {
+            return;
+        }
+
         TableColumn<UserDto, Void> actionColumn = new TableColumn<>("Actions");
 
         actionColumn.setCellFactory(param -> new TableCell<>() {
             private final Button editButton = new Button("Edit");
             private final Button deleteButton = new Button("Delete");
-            private final HBox actionButtons = new HBox(10, editButton, deleteButton);
+            private final HBox actionButtons = new HBox(10);
 
             {
-                editButton.setOnAction(event -> {
-                    UserDto user = getTableView().getItems().get(getIndex());
-                    openEditUserModal(user);
-                });
+                if (canUpdate) {
+                    editButton.setOnAction(event -> {
+                        UserDto user = getTableView().getItems().get(getIndex());
+                        openEditUserModal(user);
+                    });
+                    actionButtons.getChildren().add(editButton);
+                }
 
-                deleteButton.setOnAction(event -> {
-                    UserDto user = getTableView().getItems().get(getIndex());
-                    deleteUser(user);
-                });
+                if (canDelete) {
+                    deleteButton.setOnAction(event -> {
+                        UserDto user = getTableView().getItems().get(getIndex());
+                        deleteUser(user);
+                    });
+                    actionButtons.getChildren().add(deleteButton);
+                }
             }
 
             @Override
@@ -195,7 +212,7 @@ public class UserManagementUI {
 
             loadUsers();
         } catch (Exception e) {
-            ExceptionHandler.handleException(e, "Failed to load the user modal. Please try again.");
+            ExceptionHandler.handleException(e, "Failed to load user modal.");
         }
     }
 
