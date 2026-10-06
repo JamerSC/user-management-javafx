@@ -13,6 +13,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.controller.AddUserModalController;
+import org.example.controller.ViewUserModalController;
 import org.example.dto.UserDto;
 import org.example.service.UserService;
 import org.example.service.UserSession;
@@ -149,6 +150,7 @@ public class UserManagementUI {
     }
 
     private void initializeActionColumn() {
+        boolean canRead = UserSession.hasPermission("USER_READ");
         boolean canUpdate = UserSession.hasPermission("USER_UPDATE");
         boolean canDelete = UserSession.hasPermission("USER_DELETE");
 
@@ -160,11 +162,25 @@ public class UserManagementUI {
         TableColumn<UserDto, Void> actionColumn = new TableColumn<>("Actions");
 
         actionColumn.setCellFactory(param -> new TableCell<>() {
+            private final Button viewButton = new Button("View");
             private final Button editButton = new Button("Edit");
             private final Button deleteButton = new Button("Delete");
             private final HBox actionButtons = new HBox(10);
 
             {
+                // Style View button
+                viewButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+                editButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white;");
+                deleteButton.setStyle("-fx-background-color: #dc3545; -fx-text-fill: white;");
+
+                if (canRead) {
+                    viewButton.setOnAction(event -> {
+                        UserDto user = getTableView().getItems().get(getIndex());
+                        openViewUserModal(user);
+                    });
+                    actionButtons.getChildren().add(viewButton);
+                }
+
                 if (canUpdate) {
                     editButton.setOnAction(event -> {
                         UserDto user = getTableView().getItems().get(getIndex());
@@ -179,6 +195,23 @@ public class UserManagementUI {
                         deleteUser(user);
                     });
                     actionButtons.getChildren().add(deleteButton);
+                }
+            }
+
+            private void openViewUserModal(UserDto dto) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ViewUserModal.fxml"));
+                    VBox modalRoot = loader.load();
+
+                    ViewUserModalController controller = loader.getController();
+                    controller.setUser(dto);
+
+                    Stage modalStage = new Stage();
+                    modalStage.setTitle("View User - " + dto.getName());
+                    modalStage.setScene(new Scene(modalRoot));
+                    modalStage.showAndWait();
+                } catch (Exception e) {
+                    ExceptionHandler.handleException(e, "Failed to load user view modal.");
                 }
             }
 

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.controller.ViewUserModalController"
+      spacing="15" prefWidth="420.0" prefHeight="480.0">
+
+    <padding>
+        <Insets top="20" right="25" bottom="20" left="25"/>
+    </padding>
+
+    <!-- Header -->
+    <Label text="User Details" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <Separator />
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+        <VBox spacing="12">
+            <!-- Basic Information Section -->
+            <Label text="Basic Information" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+            <GridPane vgap="8" hgap="10">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="110"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="nameLabel" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Email:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="emailLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Separator />
+
+            <!-- Security & Roles Section -->
+            <Label text="Assigned Roles &amp; Permissions" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+            <GridPane vgap="8" hgap="10">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="110"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Roles:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="rolesLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" wrapText="true"/>
+
+                <Label text="Permissions:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="permissionsLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" wrapText="true"/>
+            </GridPane>
+
+            <Separator />
+
+            <!-- Audit Information Section -->
+            <Label text="Audit Metadata" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+            <GridPane vgap="8" hgap="10">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="110"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Created By:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="createdByLabel" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Created Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="createdDateLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Updated By:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="updatedByLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Updated Date:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="updatedDateLabel" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+            </GridPane>
+        </VBox>
+    </ScrollPane>
+
+    <!-- Close Button -->
+    <HBox alignment="CENTER_RIGHT">
+        <Button text="Close" onAction="#handleClose" prefWidth="90"/>
+    </HBox>
+</VBox>
