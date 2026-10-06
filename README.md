@@ -41,6 +41,8 @@ Architecture Overview
 
 ![image_4.png](images%2Fimage_4.png)
 
+![image_3.png](images%2Fimage_5.png)
+
 ### Java Core & Spring Boot (Java Framework) Comparison
 ```
 Java Core                     Spring Boot
