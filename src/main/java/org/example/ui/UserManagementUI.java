@@ -15,6 +15,8 @@ import javafx.stage.Stage;
 import org.example.controller.AddUserModalController;
 import org.example.controller.ViewUserModalController;
 import org.example.dto.UserDto;
+import org.example.mapper.UserMapper;
+import org.example.model.User;
 import org.example.service.UserService;
 import org.example.service.UserSession;
 import org.example.util.ExceptionHandler;
@@ -94,6 +96,11 @@ public class UserManagementUI {
         Label userLabel = new Label("Logged in as: " + activeUserName);
         userLabel.setStyle("-fx-font-weight: bold;");
 
+        // 1. Add "My Profile" Button
+        Button profileButton = new Button("My Profile");
+        profileButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;");
+        profileButton.setOnAction(e -> openMyProfileModal());
+
         Button logoutButton = new Button("Logout");
         logoutButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
         logoutButton.setOnAction(e -> {
@@ -103,18 +110,47 @@ public class UserManagementUI {
 
         Button addButton = new Button("Add User");
         addButton.setOnAction(event -> openAddUserModal());
-
         // Dynamic UI Permission Check: Hide or Disable 'Add User' button
         addButton.setVisible(UserSession.hasPermission("USER_CREATE"));
         addButton.setManaged(UserSession.hasPermission("USER_CREATE"));
 
-        HBox topBar = new HBox(10, userLabel, searchField, addButton, logoutButton);
+        HBox topBar = new HBox(10, userLabel, profileButton, searchField, addButton, logoutButton);
         topBar.setStyle("-fx-alignment: center-left;");
 
         root = new VBox(10, topBar, tableView);
         VBox.setVgrow(tableView, Priority.ALWAYS);
 
         loadUsers();
+    }
+
+    private void openMyProfileModal() {
+        UserDto currentUser = UserSession.getCurrentUser();
+        if (currentUser == null || currentUser.getId() == null) {
+            showMessage("Warning", "No active user session found.");
+            return;
+        }
+
+        try {
+            // 1. Fetch fresh user details (including audit metadata and assigned roles)
+            User freshUser = userService.getUserById(currentUser.getId());
+            UserDto profileDto = UserMapper.toDto(freshUser);
+
+            // 2. Load ViewUserModal.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ViewUserModal.fxml"));
+            VBox modalRoot = loader.load();
+
+            ViewUserModalController controller = loader.getController();
+            controller.setUser(profileDto);
+
+            // 3. Display Modal Stage
+            Stage modalStage = new Stage();
+            modalStage.setTitle("My Profile - " + profileDto.getName());
+            modalStage.setScene(new Scene(modalRoot));
+            modalStage.showAndWait();
+
+        } catch (Exception e) {
+            ExceptionHandler.handleException(e, "Failed to load profile details.");
+        }
     }
 
     public VBox getRoot() {
