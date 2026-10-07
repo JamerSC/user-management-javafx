@@ -52,12 +52,24 @@ public class UserService {
 
     // GET USER BY ID
     public User getUserById(String encryptedId) {
-        if (!UserSession.hasPermission("USER_READ")) {
+        int requestedId = Integer.parseInt(CryptoUtil.decrypt(encryptedId));
+
+        // Allow if user is checking their own profile OR holds 'USER_READ' permission
+        Integer currentUserId = getCurrentLoggedInUserId();
+        boolean isSelf = (currentUserId != null && currentUserId == requestedId);
+
+        if (!isSelf && !UserSession.hasPermission("USER_READ")) {
             throw new SecurityException("Access Denied: Missing 'USER_READ' permission.");
         }
 
-        int id = Integer.parseInt(CryptoUtil.decrypt(encryptedId));
-        return userDAO.findById(id);
+        return userDAO.findById(requestedId);
+
+//        if (!UserSession.hasPermission("USER_READ")) {
+//            throw new SecurityException("Access Denied: Missing 'USER_READ' permission.");
+//        }
+//
+//        int id = Integer.parseInt(CryptoUtil.decrypt(encryptedId));
+//        return userDAO.findById(id);
     }
 
     // UPDATE USER
